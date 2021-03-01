@@ -95,7 +95,7 @@ final class ParserTests: XCTestCase {
     func testOneOf() {
         enum Currency { case eur, gbp, usd }
 
-        let currency = Parser.oneOf(
+        let currency = Parser<Substring, Currency>.oneOf(
             Parser.prefix("€").map { Currency.eur },
             Parser.prefix("£").map { Currency.gbp },
             Parser.prefix("$").map { Currency.usd }

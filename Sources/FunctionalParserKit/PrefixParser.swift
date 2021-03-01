@@ -1,9 +1,12 @@
 import Foundation
 
-extension Parser where Input == Substring, Output == Void {
-    public static func prefix(_ p: String) -> Self {
+extension Parser where Input: Collection,
+                       Input.SubSequence == Input,
+                       Input.Element: Equatable,
+                       Output == Void {
+    public static func prefix(_ p: Input.SubSequence) -> Self {
         Self { input in
-            guard input.hasPrefix(p) else { return nil }
+            guard input.starts(with: p) else { return nil }
             input.removeFirst(p.count)
             return ()
         }

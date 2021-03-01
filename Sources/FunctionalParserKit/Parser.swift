@@ -144,7 +144,7 @@ extension Parser: ExpressibleByStringLiteral where Input == Substring, Output ==
     public typealias StringLiteralType = String
 
     public init(stringLiteral value: String) {
-        self = .prefix(value)
+        self = .prefix(value[...])
     }
 }
 
