@@ -1,6 +1,6 @@
 import Foundation
 
-extension Parser where Output == Double {
+extension Parser where Input == Substring, Output == Double {
     public static let double = Self { input in
         let original = input
         let sign: Double

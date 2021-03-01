@@ -1,6 +1,6 @@
 import Foundation
 
-extension Parser where Output == Void {
+extension Parser where Input == Substring, Output == Void {
     public static func prefix(_ p: String) -> Self {
         Self { input in
             guard input.hasPrefix(p) else { return nil }
@@ -10,7 +10,7 @@ extension Parser where Output == Void {
     }
 }
 
-extension Parser where Output == Substring {
+extension Parser where Input == Substring, Output == Substring {
     public static func prefix(upTo substring: Substring) -> Self {
         Self { input in
             guard let endIndex = input.range(of: substring)?.lowerBound
@@ -38,7 +38,7 @@ extension Parser where Output == Substring {
     }
 }
 
-extension Parser where Output == Substring {
+extension Parser where Input == Substring, Output == Substring {
     public static let everything = Self { input in
         let match = input
         input = input[input.endIndex...]

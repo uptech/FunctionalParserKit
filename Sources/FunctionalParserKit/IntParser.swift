@@ -1,6 +1,6 @@
 import Foundation
 
-extension Parser where Output == Int {
+extension Parser where Input == Substring, Output == Int {
     public static let int = Self { input in
         let original = input
 

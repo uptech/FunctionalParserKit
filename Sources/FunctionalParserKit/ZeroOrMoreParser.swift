@@ -1,8 +1,8 @@
 extension Parser {
     public func zeroOrMore(
-        separatedBy separator: Parser<Void> = .prefix("")
-    ) -> Parser<[Output]> {
-        Parser<[Output]> { input in
+        separatedBy separator: Parser<Input, Void> = .always(())
+    ) -> Parser<Input, [Output]> {
+        Parser<Input, [Output]> { input in
             var rest = input
             var matches: [Output] = []
             while let match = self.run(&input) {
