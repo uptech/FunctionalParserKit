@@ -63,10 +63,14 @@ extension Parser where Input: Collection,
     }
 }
 
-extension Parser where Input == Substring, Output == Substring {
-    public static let everything = Self { input in
-        let match = input
-        input = input[input.endIndex...]
-        return match
+extension Parser where Input: Collection,
+                       Input.SubSequence == Input,
+                       Output == Input.SubSequence {
+    public static func everything() -> Self {
+        Self { input in
+            let match = input
+            input = input[input.endIndex...]
+            return match
+        }
     }
 }
