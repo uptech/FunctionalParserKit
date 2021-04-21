@@ -55,7 +55,28 @@ final class PrefixParserTests: XCTestCase {
         XCTAssertEqual(res.match!, ["Hello", "World", "Jack"])
         XCTAssertEqual(res.rest, [])
     }
-    
+
+    func testCrash() {
+        let foo = "diff --git a/README.md b/README.md\nindex ed82b88..777d4d4 100644\n--- a/README.md\n+++ b/README.md\n@@ -1 +1,3 @@\n This is a repo to test Pullwalla with GitHub Cloud integration.\n+\n+add some text from test_branch_001 so that I can test approve/unapprove of a PR."
+//        let bar = "--- "
+
+        let restOfLine = Parser<Substring, Substring>.prefix(through: "\n").map { $0.dropLast() }
+
+        let gitDiffHeaderParser = Parser
+            .skip(.prefix(upTo: "diff --git "))
+            .take(restOfLine.map(String.init))
+        let gitDiffExtendedHeaderParser = Parser<Substring, Substring>.prefix(upTo: "--- ")
+            .flatMap { $0.isEmpty ? .always("") : .always($0.dropLast()) }
+            .map(String.init)
+
+        let gitDiffParser = gitDiffHeaderParser
+            .take(gitDiffExtendedHeaderParser)
+
+        var _rawGitDiff = foo[...]
+        let res = gitDiffParser.run(&_rawGitDiff)
+        XCTAssertEqual(res!.0, "diff --git a/README.md b/README.md")
+        XCTAssertEqual(res!.1, "index ed82b88..777d4d4 100644")
+    }
 
     static var allTests = [
         ("testPrefixOnSubstring", testPrefixOnSubstring),

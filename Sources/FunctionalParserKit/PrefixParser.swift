@@ -18,10 +18,11 @@ extension Collection where Element: Equatable {
         guard subSequence.count <= self.count else { return nil }
 
         var offset = 0
-        let offsetLimit = self.count - subSequence.count
+        let subSequenceCount = subSequence.count
+        let offsetLimit = self.count - subSequenceCount
 
         while (offset < offsetLimit) {
-            let curRange: Range<Index> = (self.index(self.startIndex, offsetBy: offset)..<self.index(subSequence.endIndex, offsetBy: offset))
+            let curRange: Range<Index> = (self.index(self.startIndex, offsetBy: offset)..<self.index(self.startIndex, offsetBy: (subSequenceCount + offset)))
             if self[curRange].elementsEqual(subSequence) {
                 return curRange
             }
