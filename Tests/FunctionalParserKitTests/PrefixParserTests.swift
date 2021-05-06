@@ -62,15 +62,17 @@ final class PrefixParserTests: XCTestCase {
 
         let restOfLine = Parser<Substring, Substring>.prefix(through: "\n").map { $0.dropLast() }
 
-        let gitDiffHeaderParser = Parser
-            .skip(.prefix(upTo: "diff --git "))
-            .take(restOfLine.map(String.init))
+        let gitDiffHeaderParser = zip(.prefix(upTo: "diff --git "),
+                                      restOfLine).map { _, a in String.init(a) }
+
+//        let gitDiffHeaderParser = Parser
+//            .skip(.prefix(upTo: "diff --git "))
+//            .take(restOfLine.map(String.init))
         let gitDiffExtendedHeaderParser = Parser<Substring, Substring>.prefix(upTo: "--- ")
             .flatMap { $0.isEmpty ? .always("") : .always($0.dropLast()) }
             .map(String.init)
 
-        let gitDiffParser = gitDiffHeaderParser
-            .take(gitDiffExtendedHeaderParser)
+        let gitDiffParser = zip(gitDiffHeaderParser, gitDiffExtendedHeaderParser)
 
         var _rawGitDiff = foo[...]
         let res = gitDiffParser.run(&_rawGitDiff)
