@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Functional",
+        "repositoryURL": "git@github.com:uptech/Functional.git",
+        "state": {
+          "branch": null,
+          "revision": "2a709b5ef2bb13eb832e5af66284b68d613f713e",
+          "version": "0.2.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
