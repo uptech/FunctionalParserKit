@@ -3,13 +3,15 @@ import FunctionalParserKit
 
 final class CharParserTests: XCTestCase {
     func testNormalCase() {
-        let res = Parser.char.run("Hello Bob")
+        let parser: Parser<Substring, Character> = .char()
+        let res = parser.run("Hello Bob")
         XCTAssertEqual(res.match, "H")
         XCTAssertEqual(res.rest, "ello Bob")
     }
 
     func testEmptyString() {
-        let res = Parser.char.run("")
+        let parser: Parser<Substring, Character> = .char()
+        let res = parser.run("")
         XCTAssertEqual(res.match, nil)
         XCTAssertEqual(res.rest, "")
     }

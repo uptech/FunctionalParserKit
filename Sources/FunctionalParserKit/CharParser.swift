@@ -1,8 +1,10 @@
 import Foundation
 
-extension Parser where Input == Substring, Output == Character {
-    public static let char = Self { input in
-        guard !input.isEmpty else { return nil }
-        return input.removeFirst()
+extension Parser {
+    public static func char() -> Parser<Substring, Character> {
+        Parser<Substring, Character> { input in
+            guard !input.isEmpty else { return nil }
+            return input.removeFirst()
+        }
     }
 }

@@ -3,7 +3,8 @@ import FunctionalParserKit
 
 final class ParserTests: XCTestCase {
     func testMap() {
-        let even = Parser.int.map { $0.isMultiple(of: 2) }
+        let parser: Parser<Substring, Int> = .int()
+        let even = parser.map { $0.isMultiple(of: 2) }
 
         let res = even.run("123 Hello")
         XCTAssertEqual(res.match, false)
@@ -15,10 +16,11 @@ final class ParserTests: XCTestCase {
     }
 
     func testFlatMap() {
-        let evenInt = Parser.int.flatMap { n in
+        let parser: Parser<Substring, Int> = .int()
+        let evenInt = parser.flatMap { n in
             n.isMultiple(of: 2)
                 ? .always(n)
-                : .never
+                : .never()
         }
 
         let res = evenInt.run("123 Hello")
@@ -32,7 +34,7 @@ final class ParserTests: XCTestCase {
 
     func testZipTwo() {
         // Parse "100°F"
-        let temparature = zip(.int, .prefix("°F"))
+        let temparature = zip(.int(), .prefix("°F"))
             .map { temperature, _ in temperature }
 
         let res = temparature.run("100°F")
@@ -45,19 +47,19 @@ final class ParserTests: XCTestCase {
     }
 
     func testZipThree() {
-        let northSouth = Parser.char.flatMap {
+        let northSouth: Parser<Substring, Double> = .char().flatMap {
             $0 == "N" ? .always(1.0)
                 : $0 == "S" ? .always(-1)
-                : .never
+                : .never()
         }
 
-        let eastWest = Parser.char.flatMap {
+        let eastWest: Parser<Substring, Double> = .char().flatMap {
             $0 == "E" ? .always(1.0)
                 : $0 == "W" ? .always(-1)
-                : .never
+                : .never()
         }
 
-        let latitude = zip(.double, .prefix("° "), northSouth)
+        let latitude = zip(.double(), .prefix("° "), northSouth)
             .map { latitude, _, latSign in
                 latitude * latSign
             }
@@ -66,7 +68,7 @@ final class ParserTests: XCTestCase {
         XCTAssertEqual(latRes.match, 40.446)
         XCTAssertEqual(latRes.rest, "")
 
-        let longitude = zip(.double, .prefix("° "), eastWest)
+        let longitude = zip(.double(), .prefix("° "), eastWest)
             .map { longitude, _, longSign in
                 longitude * longSign
             }
@@ -95,10 +97,10 @@ final class ParserTests: XCTestCase {
     func testOneOf() {
         enum Currency { case eur, gbp, usd }
 
-        let currency = Parser<Substring, Currency>.oneOf(
-            Parser.prefix("€").map { Currency.eur },
-            Parser.prefix("£").map { Currency.gbp },
-            Parser.prefix("$").map { Currency.usd }
+        let currency: Parser<Substring, Currency> = .oneOf(
+            .prefix("€").map { _ in Currency.eur },
+            .prefix("£").map { _ in Currency.gbp },
+            .prefix("$").map { _ in Currency.usd }
         )
 
         struct Money {
@@ -106,7 +108,7 @@ final class ParserTests: XCTestCase {
             let value: Double
         }
 
-        let money = zip(currency, .double).map(Money.init(currency:value:))
+        let money = zip(currency, .double()).map(Money.init(currency:value:))
 
         // "$100"
 
@@ -126,11 +128,41 @@ final class ParserTests: XCTestCase {
         XCTAssertEqual(resThree.rest, "")
     }
 
+    func testFirst() {
+        let args: ArraySlice<Substring> = ["show", "23"]
+
+        let showSubCommand: Parser<ArraySlice<Substring>, Void> = .first(.prefix("show"))
+        let res = showSubCommand.run(args)
+        res.match!
+        XCTAssertEqual(res.rest, ["23"])
+    }
+
+    func testFirstNotConsumeAllOfChild() {
+        let args: ArraySlice<Substring> = ["show", "23"]
+
+        let showSubCommand: Parser<ArraySlice<Substring>, Void> = .first(.prefix("sh"))
+        let res = showSubCommand.run(args)
+        XCTAssertNil(res.match)
+        XCTAssertEqual(res.rest, ["show", "23"])
+    }
+
+    func testFirstNotMatch() {
+        let args: ArraySlice<Substring> = ["show", "23"]
+
+        let showSubCommand: Parser<ArraySlice<Substring>, Int> = .first(.int())
+        let res = showSubCommand.run(args)
+        XCTAssertNil(res.match)
+        XCTAssertEqual(res.rest, ["show", "23"])
+    }
+
     static var allTests = [
         ("testMap", testMap),
         ("testFlatMap", testFlatMap),
         ("testZipTwo", testZipTwo),
         ("testZipThree", testZipThree),
-        ("testOneOf", testOneOf)
+        ("testOneOf", testOneOf),
+        ("testFirst", testFirst),
+        ("testFirstNotConsumeAllOfChild", testFirstNotConsumeAllOfChild),
+        ("testFirstNotMatch", testFirstNotMatch)
     ]
 }

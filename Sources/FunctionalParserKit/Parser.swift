@@ -37,11 +37,11 @@ extension Parser {
 }
 
 extension Parser {
-    public static func always(_ output: Output) -> Self {
-        Self { _ in output }
+    public static func always<O>(_ output: O) -> Parser<Input, O> {
+        Parser<Input, O> { _ in output }
     }
 
-    public static var never: Self {
+    public static func never() -> Self {
         Self { _ in nil }
     }
 }
@@ -107,7 +107,7 @@ public func zip<Input, A, B, C, D, E, F>(
 }
 
 extension Parser {
-    public static func oneOf(_ ps: [Self]) -> Self {
+    public static func oneOf<I, O>(_ ps: [Parser<I, O>]) -> Parser<I, O> {
         .init { input in
             for p in ps {
                 if let match = p.run(&input) {
@@ -118,8 +118,27 @@ extension Parser {
         }
     }
 
-    public static func oneOf(_ ps: Self...) -> Self {
+    public static func oneOf<I, O>(_ ps: Parser<I, O>...) -> Parser<I, O> {
         self.oneOf(ps)
+    }
+}
+
+extension Parser {
+    public static func first<I, O>(_ p: Parser<I.Element, O>) -> Parser<I, O> where I: Collection,
+                                                                                    I.SubSequence == I,
+                                                                                    I.Element: Equatable,
+                                                                                    I.Element: Collection {
+        Parser<I, O> { input in
+            guard input.count > 0 else { return nil }
+            guard var childParserInput = input.first else { return nil }
+
+            guard let match = p.run(&childParserInput) else { return nil }
+            guard childParserInput.isEmpty else { return nil }
+
+            input = input.dropFirst()
+
+            return match
+        }
     }
 }
 

@@ -1,13 +1,23 @@
 import Foundation
 
-extension Parser where Input: Collection,
-                       Input.SubSequence == Input,
-                       Input.Element: Equatable,
-                       Output == Void {
-    public static func prefix(_ p: Input.SubSequence) -> Self {
-        Self { input in
+extension Parser {
+    public static func prefix<I>(_ p: I.SubSequence) -> Parser<I, Void> where I: Collection,
+                                                                              I.SubSequence == I,
+                                                                              I.Element: Equatable {
+        Parser<I, Void> { input in
             guard input.starts(with: p) else { return nil }
             input.removeFirst(p.count)
+            return ()
+        }
+    }
+
+    public static func prefixE<I>(_ p: I.Element) -> Parser<I, Void> where I:Collection,
+                                                                           I.SubSequence == I,
+                                                                           I.Element: Equatable {
+        Parser<I, Void> { input in
+            guard let first = input.first else { return nil }
+            guard first == p else { return nil }
+            input.removeFirst(1)
             return ()
         }
     }
@@ -32,13 +42,11 @@ extension Collection where Element: Equatable {
     }
 }
 
-extension Parser where Input: Collection,
-                       Input.SubSequence == Input,
-                       Input.Element: Equatable,
-                       Output == Input.SubSequence {
-    
-    public static func prefix(upTo subSequence: Input.SubSequence) -> Self {
-        Self { input in
+extension Parser  {
+    public static func prefix<I>(upTo subSequence: I.SubSequence) -> Parser<I, I.SubSequence> where I: Collection,
+                                                                                                    I.SubSequence == I,
+                                                                                                    I.Element: Equatable {
+        Parser<I, I.SubSequence> { input in
             guard let endIndex = input.range(of: subSequence)?.lowerBound
             else { return nil }
 
@@ -50,8 +58,10 @@ extension Parser where Input: Collection,
         }
     }
 
-    public static func prefix(through subSequence: Input.SubSequence) -> Self {
-        Self { input in
+    public static func prefix<I>(through subSequence: I.SubSequence) -> Parser<I, I.SubSequence> where I: Collection,
+                                                                                                       I.SubSequence == I,
+                                                                                                       I.Element: Equatable {
+        Parser<I, I.SubSequence> { input in
             guard let endIndex = input.range(of: subSequence)?.upperBound
             else { return nil }
 
@@ -64,11 +74,10 @@ extension Parser where Input: Collection,
     }
 }
 
-extension Parser where Input: Collection,
-                       Input.SubSequence == Input,
-                       Output == Input.SubSequence {
-    public static func everything() -> Self {
-        Self { input in
+extension Parser {
+    public static func everything<I>() -> Parser<I, I.SubSequence> where  I: Collection,
+                                                                          I.SubSequence == I {
+        Parser<I, I.SubSequence> { input in
             let match = input
             input = input[input.endIndex...]
             return match

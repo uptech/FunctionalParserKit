@@ -3,31 +3,36 @@ import FunctionalParserKit
 
 final class IntParserTests: XCTestCase {
     func testNormalCase() {
-        let res = Parser.int.run("123 Hello")
+        let parser: Parser<Substring, Int> = .int()
+        let res = parser.run("123 Hello")
         XCTAssertEqual(res.match, 123)
         XCTAssertEqual(res.rest, " Hello")
     }
 
     func testExplicitPositiveCase() {
-        let res = Parser.int.run("+123 Hello")
+        let parser: Parser<Substring, Int> = .int()
+        let res = parser.run("+123 Hello")
         XCTAssertEqual(res.match, 123)
         XCTAssertEqual(res.rest, " Hello")
     }
 
     func testNegativeCase() {
-        let res = Parser.int.run("-123 Hello")
+        let parser: Parser<Substring, Int> = .int()
+        let res = parser.run("-123 Hello")
         XCTAssertEqual(res.match, -123)
         XCTAssertEqual(res.rest, " Hello")
     }
 
     func testNoLeaderNumber() {
-        let res = Parser.int.run("Hello Bob")
+        let parser: Parser<Substring, Int> = .int()
+        let res = parser.run("Hello Bob")
         XCTAssertEqual(res.match, nil)
         XCTAssertEqual(res.rest, "Hello Bob")
     }
 
     func testLeadNegativeButNoNumeric() {
-        let res = Parser.int.run("-Hello")
+        let parser: Parser<Substring, Int> = .int()
+        let res = parser.run("-Hello")
         XCTAssertEqual(res.match, nil)
         XCTAssertEqual(res.rest, "-Hello")
     }

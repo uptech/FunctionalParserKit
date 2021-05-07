@@ -3,7 +3,8 @@ import FunctionalParserKit
 
 final class PrefixWhileParserTests: XCTestCase {
     func testNormalCase() {
-        let res = Parser<Substring, Substring>.prefix(while: { $0 != "," }).run("Hello, Bob")
+        let parser: Parser<Substring, Substring> = .prefix(while: { $0 != "," })
+        let res = parser.run("Hello, Bob")
         XCTAssertEqual(res.match!, "Hello")
         XCTAssertEqual(res.rest, ", Bob")
     }

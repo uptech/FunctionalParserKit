@@ -3,7 +3,8 @@ import FunctionalParserKit
 
 final class PrefixParserTests: XCTestCase {
     func testPrefixOnSubstring() {
-        let res = Parser<Substring, Void>.prefix("Hello").run("Hello Bob")
+        let parser: Parser<Substring, Void> = .prefix("Hello")
+        let res = parser.run("Hello Bob")
         res.match! as Void
         XCTAssertEqual(res.rest, " Bob")
     }
@@ -28,7 +29,7 @@ final class PrefixParserTests: XCTestCase {
 
     func testPrefixOnArraySlice() {
         let collection: ArraySlice<String> = ["Hello", "World", "Bobby", "York"][...]
-        let helloWorldParser = Parser<ArraySlice<String>, Void>.prefix(["Hello", "World"][...])
+        let helloWorldParser: Parser<ArraySlice<String>, Void> = .prefix(["Hello", "World"][...])
         let res = helloWorldParser.run(collection)
         res.match!
         XCTAssertEqual(res.rest, ["Bobby", "York"])
@@ -36,7 +37,7 @@ final class PrefixParserTests: XCTestCase {
 
     func testPrefixUpToOnArraySlice() {
         let collection: Array<String> = ["Hello", "World", "Bobby", "York"]
-        let upToBobbyParser = Parser<ArraySlice<String>, ArraySlice<String>>.prefix(upTo: ["Bobby"][...])
+        let upToBobbyParser: Parser<ArraySlice<String>, ArraySlice<String>> = .prefix(upTo: ["Bobby"][...])
         let res = upToBobbyParser.run(collection[...])
         XCTAssertEqual(res.match!, ["Hello", "World"])
         XCTAssertEqual(res.rest, ["Bobby", "York"])
@@ -44,7 +45,7 @@ final class PrefixParserTests: XCTestCase {
 
     func testPrefixThroughOnArraySlice() {
         let collection: Array<String> = ["Hello", "World", "Bobby", "York"]
-        let upToBobbyParser = Parser<ArraySlice<String>, ArraySlice<String>>.prefix(through: ["Bobby"][...])
+        let upToBobbyParser: Parser<ArraySlice<String>, ArraySlice<String>> = .prefix(through: ["Bobby"][...])
         let res = upToBobbyParser.run(collection[...])
         XCTAssertEqual(res.match!, ["Hello", "World", "Bobby"])
         XCTAssertEqual(res.rest, ["York"])
@@ -58,17 +59,12 @@ final class PrefixParserTests: XCTestCase {
 
     func testCrash() {
         let foo = "diff --git a/README.md b/README.md\nindex ed82b88..777d4d4 100644\n--- a/README.md\n+++ b/README.md\n@@ -1 +1,3 @@\n This is a repo to test Pullwalla with GitHub Cloud integration.\n+\n+add some text from test_branch_001 so that I can test approve/unapprove of a PR."
-//        let bar = "--- "
 
-        let restOfLine = Parser<Substring, Substring>.prefix(through: "\n").map { $0.dropLast() }
+        let restOfLine: Parser<Substring, Substring> = .prefix(through: "\n").map { $0.dropLast() }
 
         let gitDiffHeaderParser = zip(.prefix(upTo: "diff --git "),
                                       restOfLine).map { _, a in String.init(a) }
-
-//        let gitDiffHeaderParser = Parser
-//            .skip(.prefix(upTo: "diff --git "))
-//            .take(restOfLine.map(String.init))
-        let gitDiffExtendedHeaderParser = Parser<Substring, Substring>.prefix(upTo: "--- ")
+        let gitDiffExtendedHeaderParser: Parser<Substring, String> = .prefix(upTo: "--- ")
             .flatMap { $0.isEmpty ? .always("") : .always($0.dropLast()) }
             .map(String.init)
 
