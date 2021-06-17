@@ -15,6 +15,12 @@ final class PrefixParserTests: XCTestCase {
         XCTAssertEqual(res.rest, "lo Bob")
     }
 
+    func testPrefixUpToEndOnSubstring() {
+        let res = Parser<Substring, Substring>.prefix(upTo: "b"[...]).run("Hello Bob"[...])
+        XCTAssertEqual(res.match!, "Hello Bo")
+        XCTAssertEqual(res.rest, "b")
+    }
+
     func testPrefixThroughOnSubstring() {
         let res = Parser<Substring, Substring>.prefix(through: "lo"[...]).run("Hello Bob"[...])
         XCTAssertEqual(res.match!, "Hello")

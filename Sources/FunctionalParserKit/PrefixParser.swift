@@ -31,7 +31,7 @@ extension Collection where Element: Equatable {
         let subSequenceCount = subSequence.count
         let offsetLimit = self.count - subSequenceCount
 
-        while (offset < offsetLimit) {
+        while (offset <= offsetLimit) {
             let curRange: Range<Index> = (self.index(self.startIndex, offsetBy: offset)..<self.index(self.startIndex, offsetBy: (subSequenceCount + offset)))
             if self[curRange].elementsEqual(subSequence) {
                 return curRange
